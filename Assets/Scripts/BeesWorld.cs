@@ -3,6 +3,7 @@ using UnityEngine;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Collections;
+using System.Diagnostics;
 
 public class BeesWorld : MonoBehaviour
 {
@@ -10,13 +11,7 @@ public class BeesWorld : MonoBehaviour
 
     public int beesPerTeam = 500000;
 
-    [SerializeField]
-    private Mesh beeMesh;
-    [SerializeField]
-    private Material beeMaterial;
-    [SerializeField]
-    private Color[] beeColors = new Color[3] { Color.blue, Color.yellow, Color.grey };
-
+    [Header("Field")]
     [SerializeField]
     private float3 fieldSize = new float3(300);
     [SerializeField]
@@ -35,68 +30,79 @@ public class BeesWorld : MonoBehaviour
     [SerializeField] public float hitDistance = 0.5f;
     [SerializeField] public float beeDeathTime = 30.0f;
 
+    [Header("Rendering")]
+    [SerializeField]
+    private Mesh beeMesh;
+    [SerializeField]
+    private Material beeMaterial;
+    [SerializeField]
+    private Color[] beeColors = new Color[3] { Color.blue, Color.yellow, Color.grey };
+
+
     private BeesChunk beesChunk0;
     private BeesChunk beesChunk1;
     private JobHandle beesHandle = new JobHandle();
     private BeesRenderer beesRenderer;
 
+    private BeeGizmos beeGizmos;
+    private Stopwatch simulationTimer = new Stopwatch();
+    private Stopwatch renderTimer = new Stopwatch();
+
     private void Start()
     {
+        beeGizmos = GetComponent<BeeGizmos>();
+
         beesChunk0 = new BeesChunk(beesPerTeam, Allocator.Persistent);
         beesChunk1 = new BeesChunk(beesPerTeam, Allocator.Persistent);
-
         beesRenderer = new BeesRenderer(beeMesh, beeMaterial, beeColors, beesPerTeam * 2 + (int)(beesPerTeam * 0.25f));
-
-        var InitializeBeesJob0 = new InitializeBeesJob
-        {
-            seed = (uint)UnityEngine.Random.Range(5000, 100000),
-            halfFieldSize = fieldSize * 0.5f,
-            beeAlive = beesChunk0.beeAlive,
-            beeTargets = beesChunk0.beeTargets,
-            beeRandoms = beesChunk0.beeRandoms,
-            beePositionsX = beesChunk0.beePositionsX,
-            beePositionsY = beesChunk0.beePositionsY,
-            beePositionsZ = beesChunk0.beePositionsZ,
-            beeDirectionsX = beesChunk0.beeDirectionsX,
-            beeDirectionsY = beesChunk0.beeDirectionsY,
-            beeDirectionsZ = beesChunk0.beeDirectionsZ,
-            beeVelocitiesX = beesChunk0.beeVelocitiesX,
-            beeVelocitiesY = beesChunk0.beeVelocitiesY,
-            beeVelocitiesZ = beesChunk0.beeVelocitiesZ,
-        };
-
-        var InitializeBeesJob1 = new InitializeBeesJob
-        {
-            seed = (uint)UnityEngine.Random.Range(5000, 100000),
-            halfFieldSize = fieldSize * 0.5f,
-            beeAlive = beesChunk1.beeAlive,
-            beeTargets = beesChunk1.beeTargets,
-            beeRandoms = beesChunk1.beeRandoms,
-            beePositionsX = beesChunk1.beePositionsX,
-            beePositionsY = beesChunk1.beePositionsY,
-            beePositionsZ = beesChunk1.beePositionsZ,
-            beeDirectionsX = beesChunk1.beeDirectionsX,
-            beeDirectionsY = beesChunk1.beeDirectionsY,
-            beeDirectionsZ = beesChunk1.beeDirectionsZ,
-            beeVelocitiesX = beesChunk1.beeVelocitiesX,
-            beeVelocitiesY = beesChunk1.beeVelocitiesY,
-            beeVelocitiesZ = beesChunk1.beeVelocitiesZ,
-        };
-
-        JobHandle.CombineDependencies(InitializeBeesJob0.ScheduleBatch(beesChunk0.beeCapacity, 128), InitializeBeesJob1.ScheduleBatch(beesChunk1.beeCapacity, 128)).Complete();
+        JobHandle.CombineDependencies(InitiailzeChunk(ref beesChunk0), InitiailzeChunk(ref beesChunk1)).Complete();
     }
 
     private void Update()
     {
+        simulationTimer.Start();
         beesHandle = UpdateBeeChunk(ref beesChunk0, ref beesChunk1, beesHandle);
         beesHandle = UpdateBeeChunk(ref beesChunk1, ref beesChunk0, beesHandle);
 
         beesHandle = beesRenderer.CreateDrawCalls(ref beesChunk0, 0, beesHandle);
         beesHandle = beesRenderer.CreateDrawCalls(ref beesChunk1, 1, beesHandle);
-
         beesHandle.Complete();
+        simulationTimer.Stop();
 
+        renderTimer.Start();
         beesRenderer.SubmitDrawCalls();
+        renderTimer.Stop();
+
+        beeGizmos.beeCount = beesChunk0.beeCapacity + beesChunk1.beeCapacity;
+        beeGizmos.deadBeeCount = beesChunk0.deadBees.Length + beesChunk1.deadBees.Length;
+        beeGizmos.simulationTime.UpdateValue(simulationTimer.Elapsed.TotalMilliseconds);
+        beeGizmos.renderTime.UpdateValue(renderTimer.Elapsed.TotalMilliseconds);
+
+        simulationTimer.Reset();
+        renderTimer.Reset();
+    }
+
+    private JobHandle InitiailzeChunk(ref BeesChunk beesChunk, JobHandle dependency = new JobHandle())
+    {
+        var InitializeBeesJob = new InitializeBeesJob
+        {
+            seed = (uint)UnityEngine.Random.Range(5000, 100000),
+            halfFieldSize = fieldSize * 0.5f,
+            beeAlive = beesChunk.beeAlive,
+            beeTargets = beesChunk.beeTargets,
+            beeRandoms = beesChunk.beeRandoms,
+            beePositionsX = beesChunk.beePositionsX,
+            beePositionsY = beesChunk.beePositionsY,
+            beePositionsZ = beesChunk.beePositionsZ,
+            beeDirectionsX = beesChunk.beeDirectionsX,
+            beeDirectionsY = beesChunk.beeDirectionsY,
+            beeDirectionsZ = beesChunk.beeDirectionsZ,
+            beeVelocitiesX = beesChunk.beeVelocitiesX,
+            beeVelocitiesY = beesChunk.beeVelocitiesY,
+            beeVelocitiesZ = beesChunk.beeVelocitiesZ,
+        };
+
+        return InitializeBeesJob.ScheduleBatch(beesChunk0.beeCapacity, BatchSize, dependency);
     }
 
     private JobHandle UpdateBeeChunk(ref BeesChunk beesChunk, ref BeesChunk targetChunk, JobHandle dependency = new JobHandle())
@@ -237,5 +243,6 @@ public class BeesWorld : MonoBehaviour
         beesHandle.Complete();
         beesChunk0.Dispose();
         beesChunk1.Dispose();
+        beesRenderer.Dispose();
     }
 }

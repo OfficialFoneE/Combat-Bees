@@ -24,8 +24,7 @@ Shader "Unlit/BeesShader"
             struct BeeData
             {
                 float team;
-                float alpha;
-                float3x4 transform;
+                float3 position;
             };
 
             uniform StructuredBuffer<BeeData> matrixBuffer : register (t1);
@@ -50,16 +49,15 @@ Shader "Unlit/BeesShader"
 
                 float4x4 transformMatrix = 
                 {
-                    float4(beeData.transform._11_12_13_14),
-                    float4(beeData.transform._21_22_23_24),
-                    float4(beeData.transform._31_32_33_34),
+                    float4(1.0f, 0.0f, 0.0f, beeData.position.x),
+                    float4(0.0f, 1.0f, 0.0f, beeData.position.y),
+                    float4(0.0f, 0.0f, 1.0f, beeData.position.z),
                     float4(0.0f, 0.0f, 0.0f, 1.0f),
                 };
 
                 v2f o;
                 o.vertex = UnityWorldToClipPos(mul(transformMatrix, v.vertex));
                 o.color = colors[beeData.team];
-                o.color.w = beeData.alpha;
                 return o;
             }
 

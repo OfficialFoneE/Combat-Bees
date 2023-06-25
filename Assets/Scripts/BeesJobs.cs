@@ -4,7 +4,6 @@ using Unity.Mathematics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-//Some real lazy loading.
 [BurstCompile]
 public struct InitializeBeesJob : IJobParallelForBatch
 {
@@ -191,7 +190,7 @@ public struct DespawnDeadBeesAndClearCommmandsJob : IJob
 
     public void Execute()
     {
-        // It is important to sort and loop backwards because we are using RemoveAtSwapBack which changes the indicies of elements.
+        //NOTE: It is important to sort and loop backwards because we are using RemoveAtSwapBack which changes the indicies of elements.
         despawnBees.Sort();
 
         for (int i = despawnBees.Length - 1; i >= 0; i--)
@@ -396,8 +395,7 @@ public struct BeeBoidsJob : IJobParallelForBatch
     }
 }
 
-//TODO: Correctly match system
-// Equivalent to BeeMovementSystem.cs
+// Equivalent to BeePositionUpdateSystem.cs
 [BurstCompile]
 public struct BeeMovementSystem : IJobParallelForBatch
 {

@@ -10,8 +10,7 @@ public struct BeesRenderer : System.IDisposable
     private struct BeeRenderData
     {
         public float team;
-        public float alpha;
-        public float3x4 transform;
+        public float3 position;
     };
 
     private GraphicsBuffer beeRenderBuffer;
@@ -55,9 +54,6 @@ public struct BeesRenderer : System.IDisposable
             beePositionsX = beesChunk.beePositionsX,
             beePositionsY = beesChunk.beePositionsY,
             beePositionsZ = beesChunk.beePositionsZ,
-            beeDirectionsX = beesChunk.beeDirectionsX,
-            beeDirectionsY = beesChunk.beeDirectionsY,
-            beeDirectionsZ = beesChunk.beeDirectionsZ,
             beeDatas = beeRenderDatas.AsParallelWriter(),
         };
 
@@ -81,9 +77,6 @@ public struct BeesRenderer : System.IDisposable
         [ReadOnly] public NativeArray<float> beePositionsX;
         [ReadOnly] public NativeArray<float> beePositionsY;
         [ReadOnly] public NativeArray<float> beePositionsZ;
-        [ReadOnly] public NativeArray<float> beeDirectionsX;
-        [ReadOnly] public NativeArray<float> beeDirectionsY;
-        [ReadOnly] public NativeArray<float> beeDirectionsZ;
 
         [WriteOnly] public NativeList<BeeRenderData>.ParallelWriter beeDatas;
 
@@ -95,21 +88,10 @@ public struct BeesRenderer : System.IDisposable
             int endIndex = startIndex + count;
             for (int index = startIndex; index < endIndex; index++, localMatrixCount++)
             {
-                var beeDirectionX = beeDirectionsX[index];
-                var beeDirectionY = beeDirectionsY[index];
-                var beeDirectionZ = beeDirectionsZ[index];
-
                 localMatrixes[localMatrixCount] = new BeeRenderData
                 {
                     team = team,
-                    alpha = 1.0f,
-                    transform = new float3x4
-                    {
-                        c0 = new float3(1, 0, 0),
-                        c1 = new float3(0, 1, 0),
-                        c2 = new float3(0, 0, 1),
-                        c3 = new float3(beePositionsX[index], beePositionsY[index], beePositionsZ[index]),
-                    },
+                    position = new float3(beePositionsX[index], beePositionsY[index], beePositionsZ[index]),
                 };
             }
 
@@ -131,14 +113,7 @@ public struct BeesRenderer : System.IDisposable
             beeDatas.AddNoResize(new BeeRenderData
             {
                 team = 3,
-                alpha = 0.75f,
-                transform = new float3x4
-                {
-                    c0 = new float3(1, 0, 0),
-                    c1 = new float3(0, 1, 0),
-                    c2 = new float3(0, 0, 1),
-                    c3 = deadBee.position,
-                }
+                position = deadBee.position,
             });
         }
     }
