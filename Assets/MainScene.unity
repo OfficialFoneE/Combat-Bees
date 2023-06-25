@@ -225,13 +225,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 963194225}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 269443520676520489694ba68aacfd86, type: 3}
+  m_Script: {fileID: 11500000, guid: 2673aac4fd13cef4fbe469c4072eac2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mouseAbsolute: {x: 0, y: 0}
-  mouseClampInDegrees: {x: 360, y: 180}
-  mouseSensitivity: {x: 200, y: 200}
-  moveSpeed: 35
+  movementSpeed: 10
+  fastMovementSpeed: 100
+  freeLookSensitivity: 3
+  zoomSensitivity: 10
+  fastZoomSensitivity: 50
 --- !u!1 &1822910525
 GameObject:
   m_ObjectHideFlags: 0
