@@ -26,18 +26,21 @@ Results:
 FPS: 527.
 SimTime: 0.222 ms.
 RenderTime: 0.041 ms.
+![FiftyThousandBees](https://github.com/OfficialFoneE/Combat-Bees/blob/main/Screenshots/FifythousandBees.PNG?raw=true)
 
 500,000 Bees:
 FPS: 197.
 SimTime: 2.980 ms.
 RenderTime: 0.803 ms.
 TotalRenderTime: 3.551 ms.
+![HalfMillionBees](https://github.com/OfficialFoneE/Combat-Bees/blob/main/Screenshots/HalfMillionBees.PNG?raw=true)
 
 1000000 Bees:
 FPS: 94.
 SimTime: 8.452 ms.
 RenderTime: 1.627 ms.
 TotalRenderTime: 10.139 ms.
+![FiftyThousandBees](https://github.com/OfficialFoneE/Combat-Bees/blob/main/Screenshots/MillionBees.PNG?raw=true)
 
 Results: Although it is unreasonable for DOTS to outperform any hand crafted assembly solution, it can, with the correct designs, get close. Even so, it is important to know that although DOTS may function well, we must still act within the confines of the Unity engine. And so, when it came to rendering, we saw huge differences in the Lingon Studios renderer versus the Unitys.
 
