@@ -5,8 +5,6 @@ and you can watch my video on this repostitory [here](https://www.youtube.com/wa
 
 Fortunatly, with the help of Lingon themself, I was able to run some direct comparison with the assembly versions!
 
-## Results:
-
 **Hardware:**
 - 11th Gen Intel(R) Core(TM) i7-11800H @ 2.30GHz
 - NVIDIA GeForce RTX 3060 Laptop GPU
@@ -15,23 +13,34 @@ Fortunatly, with the help of Lingon themself, I was able to run some direct comp
 **Important Numbers:**
 - Simulation Time – The CPU time in which all DOTS code ran in the application (per frame).
 - Render Time – The CPU time in which Unity spent preparing rendering and rendering (per frame).
-- Total Time – The sum of both of these times, not the total time to run one frame.
+- Calculated Frame Time – The miliseconds it would take to render one frame at the average FPS.
 
-### | 50,000 Bees | FPS: 527 | SimTime: 0.222 ms | RenderTime: 0.041 ms |
-<img src="https://github.com/OfficialFoneE/Combat-Bees/blob/main/Screenshots/FifythousandBees.PNG?raw=true" width="800" />
-
-### | 500,000 Bees | FPS: 197 | SimTime: 2.980 ms | RenderTime: 0.803 ms | TotalRenderTime: 3.551 ms |
-<img src="https://github.com/OfficialFoneE/Combat-Bees/blob/main/Screenshots/HalfMillionBees.PNG?raw=true" width="800" />
-
-### | 1000000 Bees | FPS: 94 | SimTime: 8.452 ms | RenderTime: 1.627 ms | TotalRenderTime: 10.139 ms |
-<img src="https://github.com/OfficialFoneE/Combat-Bees/blob/main/Screenshots/MillionBees.PNG?raw=true" width="800" />
+## DOTS Results
 
 ### Notes:
 - All jobs which relate to the simulation are based directly off Lingon Studio’s C# implementations. Exceptions to this is dead bees and bee rendering. Both could be sped up to better utilization Unity/DOTS.
 - All timings taken within the simulation are averages from a set number of the previous frames. The global min and max of the timings are seen to the right of the average in square brackets.
 - Dead bees are held separately from the alive to ensure there is no way to “fake” performance by having a large number of bees in the dead state.
 
-## Conclusion
-Although it is unreasonable for DOTS to outperform any hand crafted assembly solution, it can, with the correct designs, get close. Even so, it is important to know that although DOTS may function well, we must still act within the confines of the Unity engine. And so, when it came to rendering, we saw huge differences in the Lingon Studios renderer versus the Unitys.
+### | 50,000 Bees | FPS: 527 | SimTime: 0.222 ms | RenderTime: 0.041 ms | Calculated Frame Time 1.898 ms |
+<img src="https://github.com/OfficialFoneE/Combat-Bees/blob/main/Screenshots/DOTS-FiftyThousandBees.PNG?raw=true" width="800" />
 
-**To my DOTS developers:** Part of the reason I took up this challenge was to show a common trap eager DOTS developers fall into -- designing exclusibly with entities. The entities package is an important part of the DOTS ecosystem and serves to provid quick and easy scaling for game worlds. However, this also means that it is not always the best tool for the job – especially when dealing with the simple structured of data that we had here.
+### | 500,000 Bees | FPS: 197 | SimTime: 2.980 ms | RenderTime: 0.803 ms | Calculated Frame Time 5.076 ms |
+<img src="https://github.com/OfficialFoneE/Combat-Bees/blob/main/Screenshots/DOTS-HalfMillionBees.PNG?raw=true" width="800" />
+
+### | 1000000 Bees | FPS: 94 | SimTime: 8.452 ms | RenderTime: 1.627 ms | Calculated FrameTime 10.638 ms |
+<img src="https://github.com/OfficialFoneE/Combat-Bees/blob/main/Screenshots/DOTS-MillionBees.PNG?raw=true" width="800" />
+
+## Assembly Results:
+
+### Notes: 
+- The Lingon demo only had a generalized FPS counter meaning it did not track mins and maxs. So in order to get the most accurate and fair measurment, the program would be run for at least 30 seconds and only taken once the number was stable. Even so, its likely that all numbers tracked are plus or minus a certain range which I have tried to approximate here.
+
+### | 50,000 Bees | FPS: 1291 +- 80 | Calculated Frame Time 0.774 ms |
+<img src="https://github.com/OfficialFoneE/Combat-Bees/blob/main/Screenshots/ASM-MT-FiftyThousandBees.PNG?raw=true" width="800" />
+
+### | 500,000 Bees | FPS: 239 +- 7 | Calculated Frame Time: 4.184 ms |
+<img src="https://github.com/OfficialFoneE/Combat-Bees/blob/main/Screenshots/ASM-MT-HalfMillionBees.PNG?raw=true" width="800" />
+
+### | 1000000 Bees | FPS: 92 +- 3 | Calculated Frame Time: 10.8670 ms |
+<img src="https://github.com/OfficialFoneE/Combat-Bees/blob/main/Screenshots/ASM-MT-MillionBees.PNG?raw=true" width="800" />
